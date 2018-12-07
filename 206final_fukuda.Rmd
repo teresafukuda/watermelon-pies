@@ -1,0 +1,31 @@
+---
+title: "ESM206 Final"
+author: "Teresa Fukuda"
+date: "12/7/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+
+# load packages
+
+library(tidyverse) # wrangle and look at data 
+library(janitor) # clean up names to snakecase yay
+library(car) # ANOVA
+library(effsize) # compute effect sizes
+
+# load data
+
+ca_county_pesticides <- read_csv("ca_county_pesticides.csv")
+climate_opinion <- read_csv("climate_opinion.csv")
+pesticide_residues<- read_csv("PesticideResidues.csv")
+tmas_df <- read_csv("tmas_df.csv")
+ucsb_climate <- read_csv("ucsb_climate.csv")
+
+
+```
+
