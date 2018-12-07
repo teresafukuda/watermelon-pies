@@ -71,10 +71,22 @@ corrplot(cor_df, #input matrix of correlation data, not original data
 
 # Create a multiple linear regression for climate opinions (happening is output, which is a continuous measurable variable)
 
+# Want the reference level to be California
+climate_opinion$GeoName <- factor(climate_opinion$GeoName)
+climate_opinion$GeoName <- fct_relevel(climate_opinion$GeoName, "California")
+
 # Saturated model-- all variables
 climate_opinion_lm1 <- lm (happening ~ GeoName+consensus+discuss+mediaweekly+bachelors+poverty_rate+coastline, data=climate_opinion)
-
+# error: singularities
 summary(climate_opinion_lm1)
+
+plot(climate_opinion_lm1)
+
+
+# trying another model without consensus, because of a very strong correlation with happening
+climate_opinion_lm2 <- lm (happening ~ discuss+mediaweekly+bachelors+poverty_rate+coastline, data=climate_opinion)
+
+summary(climate_opinion_lm2)
 
 ```
 
