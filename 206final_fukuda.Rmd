@@ -9,7 +9,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r}
+```{r packages and data}
 
 # load packages
 
@@ -17,6 +17,7 @@ library(tidyverse) # wrangle and look at data
 library(janitor) # clean up names to snakecase yay
 library(car) # ANOVA
 library(effsize) # compute effect sizes
+library(corrplot) # For correlation matrices
 
 # load data
 
@@ -26,6 +27,63 @@ pesticide_residues<- read_csv("PesticideResidues.csv")
 tmas_df <- read_csv("tmas_df.csv")
 ucsb_climate <- read_csv("ucsb_climate.csv")
 
+
+```
+
+
+### Task 1. Climate Change Opinions
+
+```{r Task 1}
+
+# For Task 1: Explore relationships between climate change perspectives, information exposure, education attainment, poverty levels and coastline on the proportion of people who believe that global warming is happening (i.e., ‘happening’ should be your dependent variable).
+
+# Exploratory data visualization
+
+climate_opinion_vis <- ggplot (climate_opinion)+
+  geom_point(aes(y=happening, x=poverty_rate)) +
+  geom_point(aes(y=happening, x=bachelors), color="red") +
+  geom_point(aes(y=happening, x=mediaweekly), color="blue") +
+  geom_point(aes(y=happening, x=discuss), color="orange") +
+  geom_point(aes(y=happening, x=consensus), color="green")
+  
+climate_opinion_vis
+
+# create a df with only the numeric data
+pair_df <- climate_opinion[2:7]
+
+# look at the pairwise graphs of the data from pairs_df
+pairs(pair_df)
+# could be linear relationship for most; the poverty_rate plots look more blob than linear
+
+# create a correlation matrix df to use in the corrplot
+cor_df <- cor(pair_df)
+
+# visually look at this using corrplot function to make correlation matrix
+corrplot(cor_df, #input matrix of correlation data, not original data
+         type= "upper",# only shows upper half of matrix (so as not to repeat data)
+         method= "ellipse",
+         tl.col="black", # change label text color and size
+         tl.cex=0.5) 
+
+```
+
+```{r linear model}
+
+
+
+```
+
+
+a. A brief statement (1-sentence) explaining the type of analysis you chose to perform, and why it is appropriate.
+
+b. An exploratory correlation matrix for all continuous variables (make it readable, but it does not need to be finalized and you do not need to add a figure caption).
+c. A finalized table of results for your analyses (you may present more than one model), with a figure caption.
+
+d. Choose two coefficients in the model that you find interesting (either because they are expected or unexpected). For each, write a single sentence explaining what that coefficient means in terms of an expected change in the dependent variable.
+
+e. Based on diagnostic plots, describe (1 - 2 sentences) if you have concerns about heteroscedasticity or normality of residuals for your model(s). You do not need to include the diagnostic plots in your final document.
+
+```{r}
 
 ```
 
