@@ -69,7 +69,12 @@ corrplot(cor_df, #input matrix of correlation data, not original data
 
 ```{r linear model}
 
+# Create a multiple linear regression for climate opinions (happening is output, which is a continuous measurable variable)
 
+# Saturated model-- all variables
+climate_opinion_lm1 <- lm (happening ~ GeoName+consensus+discuss+mediaweekly+bachelors+poverty_rate+coastline, data=climate_opinion)
+
+summary(climate_opinion_lm1)
 
 ```
 
