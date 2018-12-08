@@ -83,10 +83,24 @@ summary(climate_opinion_lm1)
 plot(climate_opinion_lm1)
 
 
-# trying another model without consensus, because of a very strong correlation with happening
+# trying another model without consensus or geoname (geoname might not be important relative to coastline), because of a very strong correlation with happening
 climate_opinion_lm2 <- lm (happening ~ discuss+mediaweekly+bachelors+poverty_rate+coastline, data=climate_opinion)
 
 summary(climate_opinion_lm2)
+
+plot(climate_opinion_lm2)
+# nothing too alarming here
+
+
+#but what if I keep geoname and remove coastline?
+climate_opinion_lm3 <- lm (happening ~ discuss+mediaweekly+bachelors+poverty_rate+GeoName, data=climate_opinion)
+
+# GeoName coefficients don't really make sense... living in Nevada all else the same shouldn't make someone believe in climate change that much more. Nope. I don't think this model is very good... 
+
+summary(climate_opinion_lm3)
+
+
+
 
 ```
 
