@@ -15,9 +15,10 @@ knitr::opts_chunk$set(echo = TRUE)
 
 library(tidyverse) # wrangle and look at data 
 library(janitor) # clean up names to snakecase yay
-library(car) # ANOVA
+library(car) # vif
 library(effsize) # compute effect sizes
 library(corrplot) # For correlation matrices
+library(kableExtra) # making tables with kable()
 
 # load data
 
@@ -32,8 +33,10 @@ ucsb_climate <- read_csv("ucsb_climate.csv")
 
 
 ### Task 1. Climate Change Opinions
+a. A brief statement (1-sentence) explaining the type of analysis you chose to perform, and why it is appropriate.
 
-```{r Task 1}
+b. An exploratory correlation matrix for all continuous variables (make it readable, but it does not need to be finalized and you do not need to add a figure caption).
+```{r Task 1b}
 
 # For Task 1: Explore relationships between climate change perspectives, information exposure, education attainment, poverty levels and coastline on the proportion of people who believe that global warming is happening (i.e., ‘happening’ should be your dependent variable).
 
@@ -67,11 +70,14 @@ corrplot(cor_df, #input matrix of correlation data, not original data
 
 ```
 
-```{r linear model}
+c. A finalized table of results for your analyses (you may present more than one model), with a figure caption.
+
+```{r linear}
 
 # Create a multiple linear regression for climate opinions (happening is output, which is a continuous measurable variable)
 
 # Want the reference level to be California
+
 climate_opinion$GeoName <- factor(climate_opinion$GeoName)
 climate_opinion$GeoName <- fct_relevel(climate_opinion$GeoName, "California")
 
@@ -79,8 +85,6 @@ climate_opinion$GeoName <- fct_relevel(climate_opinion$GeoName, "California")
 climate_opinion_lm1 <- lm (happening ~ GeoName+consensus+discuss+mediaweekly+bachelors+poverty_rate+coastline, data=climate_opinion)
 # error: singularities
 summary(climate_opinion_lm1)
-
-plot(climate_opinion_lm1)
 
 
 # trying another model without consensus or geoname (geoname might not be important relative to coastline), because of a very strong correlation with happening
@@ -91,7 +95,10 @@ summary(climate_opinion_lm2)
 plot(climate_opinion_lm2)
 # nothing too alarming here
 
-
+AIC(climate_opinion_lm2)
+vif(climate_opinion_lm2)
+    
+    
 #but what if I keep geoname and remove coastline?
 climate_opinion_lm3 <- lm (happening ~ discuss+mediaweekly+bachelors+poverty_rate+GeoName, data=climate_opinion)
 
@@ -99,22 +106,49 @@ climate_opinion_lm3 <- lm (happening ~ discuss+mediaweekly+bachelors+poverty_rat
 
 summary(climate_opinion_lm3)
 
+# Ok, one more: what if I consider the states by region-- instead of 
+
 
 
 
 ```
 
-
-a. A brief statement (1-sentence) explaining the type of analysis you chose to perform, and why it is appropriate.
-
-b. An exploratory correlation matrix for all continuous variables (make it readable, but it does not need to be finalized and you do not need to add a figure caption).
-c. A finalized table of results for your analyses (you may present more than one model), with a figure caption.
-
 d. Choose two coefficients in the model that you find interesting (either because they are expected or unexpected). For each, write a single sentence explaining what that coefficient means in terms of an expected change in the dependent variable.
 
 e. Based on diagnostic plots, describe (1 - 2 sentences) if you have concerns about heteroscedasticity or normality of residuals for your model(s). You do not need to include the diagnostic plots in your final document.
 
+### Task 2. UCSB Campus Climate Survey-- Respectfulness by Respondent Race/Ethnicity
+
+a. In 1 - 2 sentences: What type of analysis will you perform? In the context of this task, what research question will your analysis answer?
+
+b. A one sentence finalized statement of the statistical results for the analysis you decided on in (a). You are not expected to do post-hoc testing, but you can if you want to.
+
 ```{r}
+
+# Looking at all continuous data, with more than two variables; going to use chi squared. This will answer the question: Is there a significant association between perceived respect on campus between racial groups? 
+
+# H0: No association; proportions of answers are similar across racial groups
+# H1: There is an association between race and perceived respect
+
+# make names in df snakecase
+ucsb_climate_a <- ucsb_climate %>%
+  clean_names() %>% 
+  select(-"x1") %>% 
+  as.matrix(.)
+
+rownames(ucsb_climate_a)<- c("african_american","american_indian_alaskan","asian_asianam","hispanic_latino","middleeast_sasian_safrican","pac_islander","white")
+
+campusclimate_prop <- prop.table(ucsb_climate_a,1)
+campusclimate_prop
+
+# c. A finalized figure or table that clearly shows counts and/or proportions of respondents’ perceptions of campus respect for each race/ethnicity reporting. Include a caption.
+
+campusclimate_table <- kable(campusclimate_prop)
+campusclimate_table
+
+# d. A concise 2 - 3 sentence discussion of interesting differences and/or similarities across groups, and notable big picture trends.
+
+
 
 ```
 
