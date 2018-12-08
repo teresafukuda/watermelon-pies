@@ -130,20 +130,27 @@ b. A one sentence finalized statement of the statistical results for the analysi
 # H0: No association; proportions of answers are similar across racial groups
 # H1: There is an association between race and perceived respect
 
+ucsb_climate_x2 <- chisq.test(ucsb_climate_a)
+ucsb_climate_x2
+# x-squared = 1489.6, df = 18, p-value <2.2e-16
+# p value < 0.001, significant association between race/ehtnicity and perception of respect on campus
+
 # make names in df snakecase
 ucsb_climate_a <- ucsb_climate %>%
   clean_names() %>% 
   select(-"x1") %>% 
   as.matrix(.)
 
-rownames(ucsb_climate_a)<- c("african_american","american_indian_alaskan","asian_asianam","hispanic_latino","middleeast_sasian_safrican","pac_islander","white")
+rownames(ucsb_climate_a)<- c("African/African American" ,"American Indian/Native Alaskan","Asian/Asian American" ,"Hispanic/Latino","Middle Eastern/Southeast Asian/Southern African","Pacific Islander","White")
 
 campusclimate_prop <- prop.table(ucsb_climate_a,1)
 campusclimate_prop
 
 # c. A finalized figure or table that clearly shows counts and/or proportions of respondents’ perceptions of campus respect for each race/ethnicity reporting. Include a caption.
 
-campusclimate_table <- kable(campusclimate_prop)
+campusclimate_table <- kable(round(campusclimate_prop,3)) %>% 
+   kable_styling(bootstrap_option = c("striped", "hover"), full_width = FALSE
+
 campusclimate_table
 
 # d. A concise 2 - 3 sentence discussion of interesting differences and/or similarities across groups, and notable big picture trends.
