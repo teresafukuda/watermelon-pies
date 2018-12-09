@@ -158,4 +158,45 @@ campusclimate_table
 
 
 ```
+d. A concise 2 - 3 sentence discussion of interesting differences and/or similarities across groups, and notable big picture trends.
 
+### Task 3. Effect of sex and age on self-consciousness (Taylor Manifest Anxiety Scale)
+
+a. A finalized table of model results and statistics. Include a table caption.
+
+```{r}
+# For Task 3, explore effects of sex and age on probability that a person will respond True or False to the statement: “I am usually self-conscious.” Data in ‘tmas_df.csv’ are accessed and updated from openpsychometrics.org (a cool site for open-source survey data).
+
+# exploratory data exploration
+
+# plot of age and self-conscious
+age_self_plot <- ggplot(tmas_df, aes(x=age, y=response))+
+  geom_point(aes(color=sex_mf))
+age_self_plot 
+# these look very similar in spread... 
+
+# manipulate dataframe so that true=1, false=0
+tmas_new <- tmas_df %>% 
+  mutate(tf=case_when(.$response=="True"~1,
+                      TRUE~0))
+
+
+# binary logistic regression!
+
+taylorscale_blr <- glm(tf ~ age + sex_mf, family= "binomial", data=tmas_new)
+
+summary(taylorscale_blr)
+
+# both coefficients for age and sex are negative, showing that based on the table, male self consciousness is lower and increase in age led to a decrease in self consciousness
+
+
+
+```
+
+b. A finalized graph showing predicted probabilities for True/False responses, separated by sex over a range of ages, with standard errors included. You do NOT need to include a figure caption.
+
+```{r}
+
+```
+
+c. In 2 - 3 sentences, describe trends/differences/similarities that are seen in the graph, and how those align with the results you report in (a).
