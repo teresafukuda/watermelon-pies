@@ -9,7 +9,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r packages and data}
+```{r packages and data, include=FALSE}
 
 # load packages
 
@@ -34,10 +34,10 @@ ucsb_climate <- read_csv("ucsb_climate.csv")
 
 
 ### Task 1. Climate Change Opinions
-a. A brief statement (1-sentence) explaining the type of analysis you chose to perform, and why it is appropriate.
+a. I chose to create a multiple linear regression model because the relationships between the input variables and the output (happening) could be linear, and there is more than one explanatory variable that I think contributes to the outcome of the output variable. 
 
-b. An exploratory correlation matrix for all continuous variables (make it readable, but it does not need to be finalized and you do not need to add a figure caption).
-```{r Task 1b}
+b. An exploratory correlation matrix for all continuous variables (make it readable.
+```{r Task 1b exploration, include=FALSE}
 
 # For Task 1: Explore relationships between climate change perspectives, information exposure, education attainment, poverty levels and coastline on the proportion of people who believe that global warming is happening (i.e., ‘happening’ should be your dependent variable).
 
@@ -59,6 +59,11 @@ pair_df <- climate_opinion[2:7]
 pairs(pair_df)
 # could be linear relationship for most; the poverty_rate plots look more blob than linear
 
+```
+
+```{r 1b, echo=FALSE}
+
+
 # create a correlation matrix df to use in the corrplot
 cor_df <- cor(pair_df)
 
@@ -68,12 +73,12 @@ corrplot(cor_df, #input matrix of correlation data, not original data
          method= "ellipse",
          tl.col="black", # change label text color and size
          tl.cex=0.5) 
-
 ```
+
 
 c. A finalized table of results for your analyses (you may present more than one model), with a figure caption.
 
-```{r linear}
+```{r linear regression, include=FALSE}
 
 # Create a multiple linear regression for climate opinions (happening is output, which is a continuous measurable variable)
 
@@ -107,13 +112,14 @@ climate_opinion_lm3 <- lm (happening ~ discuss+mediaweekly+bachelors+poverty_rat
 
 summary(climate_opinion_lm3)
 
-# Ok, one more: what if I consider the states by region-- instead of 
-
-
-
 
 ```
+```{r, echo=FALSE, results="asis"}
 
+stargazer(climate_opinion_lm2, type = "html")
+
+```
+ 
 d. Choose two coefficients in the model that you find interesting (either because they are expected or unexpected). For each, write a single sentence explaining what that coefficient means in terms of an expected change in the dependent variable.
 
 e. Based on diagnostic plots, describe (1 - 2 sentences) if you have concerns about heteroscedasticity or normality of residuals for your model(s). You do not need to include the diagnostic plots in your final document.
@@ -124,23 +130,26 @@ a. In 1 - 2 sentences: What type of analysis will you perform? In the context of
 
 b. A one sentence finalized statement of the statistical results for the analysis you decided on in (a). You are not expected to do post-hoc testing, but you can if you want to.
 
-```{r}
+```{r, echo=FALSE}
 
 # Looking at all continuous data, with more than two variables; going to use chi squared. This will answer the question: Is there a significant association between perceived respect on campus between racial groups? 
 
 # H0: No association; proportions of answers are similar across racial groups
 # H1: There is an association between race and perceived respect
 
-ucsb_climate_x2 <- chisq.test(ucsb_climate_a)
-ucsb_climate_x2
-# x-squared = 1489.6, df = 18, p-value <2.2e-16
-# p value < 0.001, significant association between race/ehtnicity and perception of respect on campus
 
 # make names in df snakecase
 ucsb_climate_a <- ucsb_climate %>%
   clean_names() %>% 
   select(-"x1") %>% 
   as.matrix(.)
+
+ucsb_climate_x2 <- chisq.test(ucsb_climate_a)
+ucsb_climate_x2
+# x-squared = 1489.6, df = 18, p-value <2.2e-16
+# p value < 0.001, significant association between race/ehtnicity and perception of respect on campus
+
+
 
 rownames(ucsb_climate_a)<- c("African/African American" ,"American Indian/Native Alaskan","Asian/Asian American" ,"Hispanic/Latino","Middle Eastern/Southeast Asian/Southern African","Pacific Islander","White")
 
@@ -150,7 +159,7 @@ campusclimate_prop
 # c. A finalized figure or table that clearly shows counts and/or proportions of respondents’ perceptions of campus respect for each race/ethnicity reporting. Include a caption.
 
 campusclimate_table <- kable(round(campusclimate_prop,3)) %>% 
-   kable_styling(bootstrap_option = c("striped", "hover"), full_width = FALSE
+   kable_styling(bootstrap_option = c("striped", "hover"), full_width = FALSE)
 
 campusclimate_table
 
@@ -165,7 +174,7 @@ d. A concise 2 - 3 sentence discussion of interesting differences and/or similar
 
 a. A finalized table of model results and statistics. Include a table caption.
 
-```{r}
+```{r, inclue=FALSE}
 # For Task 3, explore effects of sex and age on probability that a person will respond True or False to the statement: “I am usually self-conscious.” Data in ‘tmas_df.csv’ are accessed and updated from openpsychometrics.org (a cool site for open-source survey data).
 
 # exploratory data analysis
@@ -190,14 +199,19 @@ summary(taylorscale_blr)
 
 # both coefficients for age and sex are negative, showing that based on the table, male self consciousness is lower and increase in age led to a decrease in self consciousness
 
-# stargazer(taylorscale_blr)
 
+```
+```{r 3a table, results="asis"}
+
+stargazer(taylorscale_blr, type = "html")
 
 ```
 
+
+
 b. A finalized graph showing predicted probabilities for True/False responses, separated by sex over a range of ages, with standard errors included. You do NOT need to include a figure caption.
 
-```{r}
+```{r, echo=FALSE}
 
 # range of ages is from 14 - 94, look at both of these for male and female
 
@@ -236,7 +250,7 @@ c. In 2 - 3 sentences, describe trends/differences/similarities that are seen in
 
 ### Task 4. Pyraclostrobin residue on crops
 
-```{r presticide exploration}
+```{r presticide exploration, include=FALSE}
 
 # The question: is there a significant difference in pyraclostrobin concentrations in strawberries and carrots?
 
@@ -274,6 +288,14 @@ pesticide_plot3 <- ggplot(pesticides_new, aes(sample=chem_amt)) +
 pesticide_plot3
 # these look non-normal 
 
+# summary table for the pesticide data by crop
+pest_summary <- pesticides_new %>% 
+  group_by(commodity) %>% 
+  summarize(mean= mean(chem_amt),
+            median=median(chem_amt),
+            n=n()
+            )
+
 # I am therefore going to use the mann-whitney u non parametric test
 
 #want comparison of means so do Mann Whitney U
@@ -299,12 +321,14 @@ pesticide_test
 ```
 
 a. Summarize/describe any exploratory analyses that you performed in order to decide on the appropriate test to compare concentrations. Include exploratory graphs that informed your decision (you don’t need to finalize or include figure captions here). Based on those outcomes, justify your choice of test.
+
+
 b. In 1-2 sentences, state your final results in a format that would be suitable for publication in a professional report or article.
 
 
 
 ### Task 5. Pesticides by County, California
-```{r pesticide finalized plot}
+```{r pesticide finalized plot, echo=FALSE}
 
 # top ten CA counties ranked by pounds applied per mile plot
 
@@ -320,12 +344,14 @@ county_pest_plot <- ca_county_pesticides %>%
    theme(panel.grid.major = element_blank(),
       panel.grid.minor = element_blank(), 
       panel.background = element_blank(),
-      axis.line = element_line(colour = "black")) + #aesthetics
+      axis.line = element_line(colour = "black"),
+      text = element_text(family = "Times New Roman")) + #aesthetics
   labs(x = "County",
        y = "Pesticide Applied"~(lbs/mi^2)) + #labels for the axes-- coord flip switched these earlier, so xlab is for the y axis now
        theme(legend.position = "none") + #no legend 
-  scale_y_continuous(expand = c(0,0)) # move data to align w y axis
-  
+  scale_y_continuous(expand = c(0,0))+ # move data to align w y axis
+  ggtitle("Top Ten Counties in California by Pesticide Use in 2014")
+
 county_pest_plot
 ```
 
