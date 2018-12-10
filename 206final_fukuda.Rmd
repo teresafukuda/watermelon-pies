@@ -19,6 +19,7 @@ library(car) # vif
 library(effsize) # compute effect sizes
 library(corrplot) # For correlation matrices
 library(kableExtra) # making tables with kable()
+library(stargazer) # Linear regression output table
 
 # load data
 
@@ -167,7 +168,7 @@ a. A finalized table of model results and statistics. Include a table caption.
 ```{r}
 # For Task 3, explore effects of sex and age on probability that a person will respond True or False to the statement: “I am usually self-conscious.” Data in ‘tmas_df.csv’ are accessed and updated from openpsychometrics.org (a cool site for open-source survey data).
 
-# exploratory data exploration
+# exploratory data analysis
 
 # plot of age and self-conscious
 age_self_plot <- ggplot(tmas_df, aes(x=age, y=response))+
@@ -189,6 +190,7 @@ summary(taylorscale_blr)
 
 # both coefficients for age and sex are negative, showing that based on the table, male self consciousness is lower and increase in age led to a decrease in self consciousness
 
+# stargazer(taylorscale_blr)
 
 
 ```
@@ -197,6 +199,124 @@ b. A finalized graph showing predicted probabilities for True/False responses, s
 
 ```{r}
 
+# range of ages is from 14 - 94, look at both of these for male and female
+
+#first create a new df with these predicted values
+
+seq_age <- rep(seq(from = 14, to = 94), 2) # Create a vector with sequence from 0 to 100, twice (one will be "Male" and one will be "Female")
+
+f_81 <- rep("Female", 81) # Repeat 'Female' 81 times (to match years data)
+m_81 <- rep("Male", 81) # Repeat 'Male' 81 times
+mf_81 <- c(f_81, m_81) # Combine them into a single vector
+
+tmas_predict_df <- data.frame(seq_age, mf_81) # MUST make column names match variables in the model!
+colnames(tmas_predict_df) <- c("age","sex_mf")
+
+predicted_probs <- predict(taylorscale_blr, newdata=tmas_predict_df, type= "response", se.fit=TRUE) # se.fit=TRUE calculates a standard error
+
+# Coerce outcome into data frame. 
+
+graph_data <- data.frame (tmas_predict_df, predicted_probs$fit, predicted_probs$se.fit)
+
+colnames(graph_data) <- c("Age","Sex","probability","SE")
+
+# make a plot of the data for ages range 14 to 94
+
+tmas_plot <- ggplot(graph_data, aes(x= Age, y= probability)) +
+  geom_line(aes(color=Sex)) + # tells R that there are different series 
+  geom_ribbon(aes(ymin= probability-SE, ymax= probability +SE, fill=Sex), alpha = 0.4)
+
+
+tmas_plot
+
 ```
 
 c. In 2 - 3 sentences, describe trends/differences/similarities that are seen in the graph, and how those align with the results you report in (a).
+
+
+### Task 4. Pyraclostrobin residue on crops
+
+```{r presticide exploration}
+
+# The question: is there a significant difference in pyraclostrobin concentrations in strawberries and carrots?
+
+# df for this is pesticide_residues
+
+# isolate the columns of interest: "COMMODITY" "CHEMICAL DETECTED (IF ANY)" "AMOUNT OF CHEMICAL DETECTED (PPM)" and filter out all NA values, and keep only "STRAWBERRY (ALL OR UNSPEC)" and "CARROTS(ROOT CROP)"
+pesticides_new <- pesticide_residues %>% 
+  select ("COMMODITY","CHEMICAL DETECTED (IF ANY)","AMOUNT OF CHEMICAL DETECTED (PPM)") %>% 
+  filter (.$"CHEMICAL DETECTED (IF ANY)" == "PYRACLOSTROBIN") %>% 
+  filter(.$"COMMODITY" == "STRAWBERRY (ALL OR UNSPEC)" |
+           .$"COMMODITY" == "CARROTS (ROOT CROP)")
+  
+
+# rename columns in pesticides_new to "commodity","chemical_name","chem_amt"
+colnames(pesticides_new)<- (c("commodity","chemical_name","chem_amt"))
+
+# exploratory data visualization
+
+pesticide_plot <- ggplot(pesticides_new, aes(x=commodity, y=chem_amt), legend=FALSE) +
+  geom_point()
+pesticide_plot
+
+# well these look unequal, that's for sure. I have two groups here and a measured continuous variable for each. I think that's a situation where I would want to compare; Is there a significant difference between the mean pesticide amount on each crop? I'm going to see how normal the data is, and if I can perhaps use a t-test
+#histograms of chemical amt by crop
+pesticide_plot2 <- ggplot(pesticides_new, aes(x=chem_amt)) +
+  geom_histogram() +
+  facet_wrap(~commodity, scale="free")
+pesticide_plot2
+# these look very non-normal
+
+#qq plots
+pesticide_plot3 <- ggplot(pesticides_new, aes(sample=chem_amt)) +
+  geom_qq() +
+  facet_wrap(~commodity, scale="free")
+pesticide_plot3
+# these look non-normal 
+
+# I am therefore going to use the mann-whitney u non parametric test
+
+#want comparison of means so do Mann Whitney U
+#H0: Ranks are equal
+#HA: ranks are different
+
+# make data frame w columns for each commodity
+strawb <- pesticides_new %>% 
+  select(commodity,chem_amt) %>% 
+  filter(commodity == "STRAWBERRY (ALL OR UNSPEC)") %>% 
+  select (chem_amt)
+
+carrot <- pesticides_new %>% 
+  select(commodity,chem_amt) %>% 
+  filter(commodity == "CARROTS (ROOT CROP)") %>% 
+  select (chem_amt)
+  
+
+pesticide_test <- wilcox.test(strawb$chem_amt, carrot$chem_amt, alternative= c("two.sided"))
+pesticide_test
+
+
+```
+
+a. Summarize/describe any exploratory analyses that you performed in order to decide on the appropriate test to compare concentrations. Include exploratory graphs that informed your decision (you don’t need to finalize or include figure captions here). Based on those outcomes, justify your choice of test.
+b. In 1-2 sentences, state your final results in a format that would be suitable for publication in a professional report or article.
+
+
+
+### Task 5. Pesticides by County, California
+```{r pesticide finalized plot}
+
+# top ten CA counties ranked by pounds applied per mile 
+
+# snake case, 
+
+county_pest_plot <- ca_county_pesticides %>% 
+  clean_names()
+  
+  
+
+
+
+```
+
+
