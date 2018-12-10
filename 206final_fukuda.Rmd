@@ -341,9 +341,7 @@ pesticide_cliffs
 ```
 
 
-b. In 1-2 sentences, state your final results in a format that would be suitable for publication in a professional report or article.
-
-“Pesticide use of P yraclostrobin differed between the two crops, with a higher median sample rank (value) for carrots (n =  N), versus a sample median of VALUE  for strawberries (n = NNNNN). A Mann-Whitney U test revealed that the difference was significant (W = `r pesticide_test$statistic`, p = `r pesticide_test$p.value`) with a moderate effect size (Cliff’s delta = `r pesticide_cliffs$estimate`)."
+b. Pesticide use of Pyraclostrobin differed between the two crops, with a higher median pesticide measurement (`r pest_summary[1,"median"]` ppm) for carrots (n = `r pest_summary[1,"n"]`), versus a pesticide measurement median of (`r pest_summary[2,"median"]` ppm) for strawberries (n = `r pest_summary[2,"n"]`). A Mann-Whitney U test revealed that the difference was significant (W = `r pesticide_test$statistic`, p <0.001) with a large effect size (Cliff’s delta = `r pesticide_cliffs$estimate`).
 
 
 
