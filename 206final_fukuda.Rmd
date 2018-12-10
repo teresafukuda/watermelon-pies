@@ -114,6 +114,9 @@ summary(climate_opinion_lm3)
 
 
 ```
+
+
+*Table 1.* Multiple linear regression model of opinions on climate change. 
 ```{r, echo=FALSE, results="asis"}
 
 stargazer(climate_opinion_lm2, type = "html")
@@ -130,7 +133,7 @@ a. In 1 - 2 sentences: What type of analysis will you perform? In the context of
 
 b. A one sentence finalized statement of the statistical results for the analysis you decided on in (a). You are not expected to do post-hoc testing, but you can if you want to.
 
-```{r, echo=FALSE}
+```{r, include=FALSE}
 
 # Looking at all continuous data, with more than two variables; going to use chi squared. This will answer the question: Is there a significant association between perceived respect on campus between racial groups? 
 
@@ -174,7 +177,7 @@ d. A concise 2 - 3 sentence discussion of interesting differences and/or similar
 
 a. A finalized table of model results and statistics. Include a table caption.
 
-```{r, inclue=FALSE}
+```{r, include=FALSE}
 # For Task 3, explore effects of sex and age on probability that a person will respond True or False to the statement: “I am usually self-conscious.” Data in ‘tmas_df.csv’ are accessed and updated from openpsychometrics.org (a cool site for open-source survey data).
 
 # exploratory data analysis
@@ -211,7 +214,7 @@ stargazer(taylorscale_blr, type = "html")
 
 b. A finalized graph showing predicted probabilities for True/False responses, separated by sex over a range of ages, with standard errors included. You do NOT need to include a figure caption.
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, fig.align = "center", fig.cap = "**Figure 2. Impact of Fishing Pressure on Spiny Lobster Abundance Across All Locations** Blue lines indicate populations abundance in number of Spiny Lobsters (Panulirus Interruptus) and grey lines represent fishing pressure as measured by number of fishing trap floats counted. Results are from years 2012 through 2017"}
 
 # range of ages is from 14 - 94, look at both of these for male and female
 
@@ -238,19 +241,30 @@ colnames(graph_data) <- c("Age","Sex","probability","SE")
 
 tmas_plot <- ggplot(graph_data, aes(x= Age, y= probability)) +
   geom_line(aes(color=Sex)) + # tells R that there are different series 
-  geom_ribbon(aes(ymin= probability-SE, ymax= probability +SE, fill=Sex), alpha = 0.4)
-
+  geom_ribbon(aes(ymin= probability-SE, ymax= probability +SE, fill=Sex), alpha = 0.3) +
+   theme(panel.grid.major = element_blank(),
+      panel.grid.minor = element_blank(), 
+      panel.background = element_blank(),
+      axis.line = element_line(colour = "black"),
+      text = element_text(family = "Times New Roman")) + #aesthetics
+  labs(x = "Age",
+       y = "Probability of answering “I am usually self-conscious.”") + #labels for the axes-- coord flip switched these earlier, so xlab is for the y axis now
+       theme(legend.position = "none") + #no legend 
+  scale_y_continuous(expand = c(0,0)) + # move data to align w y axis
+  scale_x_continuous(expand = c(0,0))
 
 tmas_plot
 
 ```
+*Figure 1. Model of Taylor Manifest Anxiety Scale by age.* 
 
 c. In 2 - 3 sentences, describe trends/differences/similarities that are seen in the graph, and how those align with the results you report in (a).
 
 
 ### Task 4. Pyraclostrobin residue on crops
+a. In my exploratory visualization of the data, first I made a scatterplot to see the values of the pesticide chemical measurements for each crop. Looking at these, there appears to be a difference between strawberries and carrots, with strawberries having more measurements that are much higher. I would initally expect to use a t-test to compare the values for significant differences; in order to test this, I created histograms and q-q plots for each crop. Both of the histograms look non-normal, with a low peak and a long tail up to higher values. The q-q plots also are more curved than linear. Even if the data looked non-normal, with a large enough sample size, I would still consider doing a t-test, but with a summary table, I see that the sample size for carrots is less than 30. Thus, I choose to do a Mann Whitney-U Test because it is a non-parametric method to compare ranks between a continuous measured output.
 
-```{r presticide exploration, include=FALSE}
+```{r pesticide exploration, echo=FALSE}
 
 # The question: is there a significant difference in pyraclostrobin concentrations in strawberries and carrots?
 
@@ -293,9 +307,12 @@ pest_summary <- pesticides_new %>%
   group_by(commodity) %>% 
   summarize(mean= mean(chem_amt),
             median=median(chem_amt),
-            n=n()
-            )
+            n=n())
 
+```
+
+
+```{r pesticide mann-u, include= FALSE}
 # I am therefore going to use the mann-whitney u non parametric test
 
 #want comparison of means so do Mann Whitney U
@@ -313,28 +330,29 @@ carrot <- pesticides_new %>%
   filter(commodity == "CARROTS (ROOT CROP)") %>% 
   select (chem_amt)
   
-
+# run a mann whitney u test
 pesticide_test <- wilcox.test(strawb$chem_amt, carrot$chem_amt, alternative= c("two.sided"))
 pesticide_test
 
+#the result is significant p<0.001, so calculate Cliff's Delta
+pesticide_cliffs <- cliff.delta(strawb$chem_amt, carrot$chem_amt)
+pesticide_cliffs
 
 ```
-
-a. Summarize/describe any exploratory analyses that you performed in order to decide on the appropriate test to compare concentrations. Include exploratory graphs that informed your decision (you don’t need to finalize or include figure captions here). Based on those outcomes, justify your choice of test.
 
 
 b. In 1-2 sentences, state your final results in a format that would be suitable for publication in a professional report or article.
 
+“Pesticide use of P yraclostrobin differed between the two crops, with a higher median sample rank (value) for carrots (n =  N), versus a sample median of VALUE  for strawberries (n = NNNNN). A Mann-Whitney U test revealed that the difference was significant (W = `r pesticide_test$statistic`, p = `r pesticide_test$p.value`) with a moderate effect size (Cliff’s delta = `r pesticide_cliffs$estimate`)."
+
 
 
 ### Task 5. Pesticides by County, California
-```{r pesticide finalized plot, echo=FALSE}
-
+```{r pesticide finalized plot, fig.align = "center"}
 # top ten CA counties ranked by pounds applied per mile plot
 
 county_pest_plot <- ca_county_pesticides %>% 
   clean_names() %>% #make all names snake case
-  data.frame(.) %>% 
   mutate(pest_per_mile=pounds_active_pesticide_ingredient_used/county_area_square_miles) %>%  # add a column for pounds pesticide per square mile area in county
   arrange(-.$pest_per_mile) %>% # arrange by pesticide per area
   head(10) %>% #keep the top ten counties by pesticide per area
