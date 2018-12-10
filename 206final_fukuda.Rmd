@@ -129,9 +129,9 @@ e. Based on diagnostic plots, describe (1 - 2 sentences) if you have concerns ab
 
 ### Task 2. UCSB Campus Climate Survey-- Respectfulness by Respondent Race/Ethnicity
 
-a. In 1 - 2 sentences: What type of analysis will you perform? In the context of this task, what research question will your analysis answer?
+a. I am looking at continuous data with more than two independent variables, so I am going to use a chi-squared test. This will answer the question: is there a significant association between perceived respect and racial groups on UCSB campus? 
 
-b. A one sentence finalized statement of the statistical results for the analysis you decided on in (a). You are not expected to do post-hoc testing, but you can if you want to.
+b. There is a significant association between racial groups and perceived respect on UCSB campus; different racial groups feel significantly differently about the level of respect that they receive. 
 
 ```{r, include=FALSE}
 
@@ -156,8 +156,18 @@ ucsb_climate_x2
 
 rownames(ucsb_climate_a)<- c("African/African American" ,"American Indian/Native Alaskan","Asian/Asian American" ,"Hispanic/Latino","Middle Eastern/Southeast Asian/Southern African","Pacific Islander","White")
 
+colnames(ucsb_climate_a)<- c("Very Respectful","Respectful","Disrespectful","Very Disrespectful")
+
 campusclimate_prop <- prop.table(ucsb_climate_a,1)
 campusclimate_prop
+
+
+
+```
+
+c. 
+```{r campus climate table, echo=FALSE}
+
 
 # c. A finalized figure or table that clearly shows counts and/or proportions of respondents’ perceptions of campus respect for each race/ethnicity reporting. Include a caption.
 
@@ -165,17 +175,13 @@ campusclimate_table <- kable(round(campusclimate_prop,3)) %>%
    kable_styling(bootstrap_option = c("striped", "hover"), full_width = FALSE)
 
 campusclimate_table
-
-# d. A concise 2 - 3 sentence discussion of interesting differences and/or similarities across groups, and notable big picture trends.
-
-
-
 ```
+
 d. A concise 2 - 3 sentence discussion of interesting differences and/or similarities across groups, and notable big picture trends.
 
 ### Task 3. Effect of sex and age on self-consciousness (Taylor Manifest Anxiety Scale)
 
-a. A finalized table of model results and statistics. Include a table caption.
+a. **Table 1. Self consciousness (Taylor Manifest Anxiety Scale) binomial logarithmic regression results.** Data source: openpsychometrics.org
 
 ```{r, include=FALSE}
 # For Task 3, explore effects of sex and age on probability that a person will respond True or False to the statement: “I am usually self-conscious.” Data in ‘tmas_df.csv’ are accessed and updated from openpsychometrics.org (a cool site for open-source survey data).
@@ -200,21 +206,26 @@ taylorscale_blr <- glm(tf ~ age + sex_mf, family= "binomial", data=tmas_new)
 
 summary(taylorscale_blr)
 
-# both coefficients for age and sex are negative, showing that based on the table, male self consciousness is lower and increase in age led to a decrease in self consciousness
+# both coefficients for age and sex are negative, showing that based on the table, male self consciousness is lower and increase in age led to a decrease in self consciousness, although the difference between male and female is not significant (p=0.863)
+
 
 
 ```
-```{r 3a table, results="asis"}
+```{r 3a table, echo=FALSE, fig.align = "center", results="asis"}
 
-stargazer(taylorscale_blr, type = "html")
+stargazer(taylorscale_blr, 
+          dep.var.labels = "Probability of 'True' response to 'I am usually self-conscious'", 
+          covariate.labels = c("Age","Sex: male","Constant"), 
+          type = "html")
 
 ```
 
 
 
-b. A finalized graph showing predicted probabilities for True/False responses, separated by sex over a range of ages, with standard errors included. You do NOT need to include a figure caption.
 
-```{r, echo=FALSE, fig.align = "center", fig.cap = "**Figure 2. Impact of Fishing Pressure on Spiny Lobster Abundance Across All Locations** Blue lines indicate populations abundance in number of Spiny Lobsters (Panulirus Interruptus) and grey lines represent fishing pressure as measured by number of fishing trap floats counted. Results are from years 2012 through 2017"}
+b. 
+
+```{r, echo=FALSE, fig.align = "center"}
 
 # range of ages is from 14 - 94, look at both of these for male and female
 
@@ -251,15 +262,15 @@ tmas_plot <- ggplot(graph_data, aes(x= Age, y= probability)) +
        y = "Probability of answering “I am usually self-conscious.”") + #labels for the axes-- coord flip switched these earlier, so xlab is for the y axis now
        theme(legend.position = "none") + #no legend 
   scale_y_continuous(expand = c(0,0)) + # move data to align w y axis
-  scale_x_continuous(expand = c(0,0))
+  scale_x_continuous(expand = c(0,0))+ # move data to align w x axis
+  ggtitle("Binary Logistic Model of Self Consciousness by Age and Sex")
 
 tmas_plot
 
 ```
-*Figure 1. Model of Taylor Manifest Anxiety Scale by age.* 
 
-c. In 2 - 3 sentences, describe trends/differences/similarities that are seen in the graph, and how those align with the results you report in (a).
 
+c. Between both sexes, the graph shows a decrease in the probability of self-reported self sonciousness with age. This is consistent with the results in (a) where the logodds of self consciousness has a negative coefficient with a significant p-value. Also there is a very small, almost imperceptible difference between males and females on the graph, which is consistent with the very small decrease in logodds predicted by the model between males and females with an p value > 0.05. 
 
 ### Task 4. Pyraclostrobin residue on crops
 a. In my exploratory visualization of the data, first I made a scatterplot to see the values of the pesticide chemical measurements for each crop. Looking at these, there appears to be a difference between strawberries and carrots, with strawberries having more measurements that are much higher. I would initally expect to use a t-test to compare the values for significant differences; in order to test this, I created histograms and q-q plots for each crop. Both of the histograms look non-normal, with a low peak and a long tail up to higher values. The q-q plots also are more curved than linear. Even if the data looked non-normal, with a large enough sample size, I would still consider doing a t-test, but with a summary table, I see that the sample size for carrots is less than 30. Thus, I choose to do a Mann Whitney-U Test because it is a non-parametric method to compare ranks between a continuous measured output.
@@ -366,7 +377,7 @@ county_pest_plot <- ca_county_pesticides %>%
        y = "Pesticide Applied"~(lbs/mi^2)) + #labels for the axes-- coord flip switched these earlier, so xlab is for the y axis now
        theme(legend.position = "none") + #no legend 
   scale_y_continuous(expand = c(0,0))+ # move data to align w y axis
-  ggtitle("Top Ten Counties in California by Pesticide Use in 2014")
+  ggtitle("Top 10 California Counties by Pesticide Use")
 
 county_pest_plot
 ```
