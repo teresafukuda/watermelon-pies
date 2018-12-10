@@ -306,17 +306,27 @@ b. In 1-2 sentences, state your final results in a format that would be suitable
 ### Task 5. Pesticides by County, California
 ```{r pesticide finalized plot}
 
-# top ten CA counties ranked by pounds applied per mile 
-
-# snake case, 
+# top ten CA counties ranked by pounds applied per mile plot
 
 county_pest_plot <- ca_county_pesticides %>% 
-  clean_names()
+  clean_names() %>% #make all names snake case
+  data.frame(.) %>% 
+  mutate(pest_per_mile=pounds_active_pesticide_ingredient_used/county_area_square_miles) %>%  # add a column for pounds pesticide per square mile area in county
+  arrange(-.$pest_per_mile) %>% # arrange by pesticide per area
+  head(10) %>% #keep the top ten counties by pesticide per area
+  ggplot(.,aes(x=reorder(county,pest_per_mile), y=pest_per_mile)) + #create a plot of county and pesticide use per mile, ordered by pest per mile
+  geom_col(fill="grey49") + # column graph w slightly lighter bars than default 
+  coord_flip() +
+   theme(panel.grid.major = element_blank(),
+      panel.grid.minor = element_blank(), 
+      panel.background = element_blank(),
+      axis.line = element_line(colour = "black")) + #aesthetics
+  labs(x = "County",
+       y = "Pesticide Applied"~(lbs/mi^2)) + #labels for the axes-- coord flip switched these earlier, so xlab is for the y axis now
+       theme(legend.position = "none") + #no legend 
+  scale_y_continuous(expand = c(0,0)) # move data to align w y axis
   
-  
-
-
-
+county_pest_plot
 ```
 
 
