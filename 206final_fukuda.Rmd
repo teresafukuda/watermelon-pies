@@ -34,9 +34,9 @@ ucsb_climate <- read_csv("ucsb_climate.csv")
 
 
 ### Task 1. Climate Change Opinions
-a. I chose to create a multiple linear regression model because the relationships between the input variables and the output (happening) could be linear, and there is more than one explanatory variable that I think contributes to the outcome of the output variable. 
+a. I chose to create a multiple linear regression model because the relationships between the input variables and the output (happening) appear to be somewhat linear, independent, and there is more than one explanatory variable that I think contributes to the outcome of the output variable. 
 
-b. An exploratory correlation matrix for all continuous variables (make it readable.
+b.
 ```{r Task 1b exploration, include=FALSE}
 
 # For Task 1: Explore relationships between climate change perspectives, information exposure, education attainment, poverty levels and coastline on the proportion of people who believe that global warming is happening (i.e., ‘happening’ should be your dependent variable).
@@ -76,8 +76,6 @@ corrplot(cor_df, #input matrix of correlation data, not original data
 ```
 
 
-c. A finalized table of results for your analyses (you may present more than one model), with a figure caption.
-
 ```{r linear regression, include=FALSE}
 
 # Create a multiple linear regression for climate opinions (happening is output, which is a continuous measurable variable)
@@ -89,11 +87,11 @@ climate_opinion$GeoName <- fct_relevel(climate_opinion$GeoName, "California")
 
 # Saturated model-- all variables
 climate_opinion_lm1 <- lm (happening ~ GeoName+consensus+discuss+mediaweekly+bachelors+poverty_rate+coastline, data=climate_opinion)
-# error: singularities
+# error: singularities.
 summary(climate_opinion_lm1)
 
 
-# trying another model without consensus or geoname (geoname might not be important relative to coastline), because of a very strong correlation with happening
+# trying another model without consensus or geoname (geoname might not be important relative to coastline-- shows the same thing), because of a very strong correlation with happening; also I think discuss and media may be saying the same thing-- if you hear about global warming a lot from media likely to be discussing it, but I think discuss is more valuable-- people who do not consume media may still discuss.  
 climate_opinion_lm2 <- lm (happening ~ discuss+mediaweekly+bachelors+poverty_rate+coastline, data=climate_opinion)
 
 summary(climate_opinion_lm2)
@@ -108,30 +106,33 @@ vif(climate_opinion_lm2)
 #but what if I keep geoname and remove coastline?
 climate_opinion_lm3 <- lm (happening ~ discuss+mediaweekly+bachelors+poverty_rate+GeoName, data=climate_opinion)
 
-# GeoName coefficients don't really make sense... living in Nevada all else the same shouldn't make someone believe in climate change that much more. Nope. I don't think this model is very good... 
+# GeoName coefficients don't really make sense... and make this so complex! I think coastline is specific enough. Really I think something along the lines of population density or major cities would be best, but states with coast probably have higher pop usually so maybe that will suffice. 
 
 summary(climate_opinion_lm3)
 
-
 ```
 
 
-*Table 1.* Multiple linear regression model of opinions on climate change. 
+c. **Table 1.** Multiple linear regression model of opinions on climate change. Variables are described in terms of percentage that agrees with the statements. Data source: [Yale Climate Opinion Maps](http://climatecommunication.yale.edu/ visualizations-data/ycom-us-2018/?est=happening&type=value&geo=county) and [US Census Bureau](factfinder.census.gov)
 ```{r, echo=FALSE, results="asis"}
-
-stargazer(climate_opinion_lm2, type = "html")
+# table of results of regression
+stargazer(climate_opinion_lm2,
+          type = "html",
+           dep.var.labels = "Agrees that climate change is happening", 
+          covariate.labels = c("Discuss global warming","Hears about global warming in the media weekly", "Have attained a Bachelors degree","Poverty rate","Lives in a state with coastline"))
 
 ```
  
-d. Choose two coefficients in the model that you find interesting (either because they are expected or unexpected). For each, write a single sentence explaining what that coefficient means in terms of an expected change in the dependent variable.
+d. Based on my model, for a 1% increase in those living state with coastline, I would expect a 2.5% increase in percentage of a state population that agrees that climate change is happening. Also if the poverty rate increases by 1%, I would expect a 0.29% increase in the percentage that agrees climate change is happening. I find these both to be surprising relationships.
 
-e. Based on diagnostic plots, describe (1 - 2 sentences) if you have concerns about heteroscedasticity or normality of residuals for your model(s). You do not need to include the diagnostic plots in your final document.
+e. Based on the diagnstic plots, my residuals appear to be non-heteroscedastic and the residuals appear to be mostly normal. There are just a few points that are not linear about the expected values on the q-q, but the rest look fine. 
 
+\newpage
 ### Task 2. UCSB Campus Climate Survey-- Respectfulness by Respondent Race/Ethnicity
 
 a. I am looking at continuous data with more than two independent variables, so I am going to use a chi-squared test. This will answer the question: is there a significant association between perceived respect and racial groups on UCSB campus? 
 
-b. There is a significant association between racial groups and perceived respect on UCSB campus; different racial groups feel significantly differently about the level of respect that they receive. 
+b. There is a significant difference between racial groups and perceived levels of respect on UCSB campus.
 
 ```{r, include=FALSE}
 
@@ -153,7 +154,6 @@ ucsb_climate_x2
 # p value < 0.001, significant association between race/ehtnicity and perception of respect on campus
 
 
-
 rownames(ucsb_climate_a)<- c("African/African American" ,"American Indian/Native Alaskan","Asian/Asian American" ,"Hispanic/Latino","Middle Eastern/Southeast Asian/Southern African","Pacific Islander","White")
 
 colnames(ucsb_climate_a)<- c("Very Respectful","Respectful","Disrespectful","Very Disrespectful")
@@ -162,13 +162,11 @@ campusclimate_prop <- prop.table(ucsb_climate_a,1)
 campusclimate_prop
 
 
-
 ```
 
-c. 
+c. **Table 2.** Proportions of survey respondents' perceptions of campus respect. Data source: [UCSB Campus Climate Survey](http://diversity.ucsb.edu/CampusClimate/)
+
 ```{r campus climate table, echo=FALSE}
-
-
 # c. A finalized figure or table that clearly shows counts and/or proportions of respondents’ perceptions of campus respect for each race/ethnicity reporting. Include a caption.
 
 campusclimate_table <- kable(round(campusclimate_prop,3)) %>% 
@@ -177,11 +175,12 @@ campusclimate_table <- kable(round(campusclimate_prop,3)) %>%
 campusclimate_table
 ```
 
-d. A concise 2 - 3 sentence discussion of interesting differences and/or similarities across groups, and notable big picture trends.
+d. Across all groups, the majority of respondents said that they felt the campus climate was "respectful" and less than 2% of respondents in any racial group said the climate was "very disrespectful." Of all the racial groups specified, though, white respondents had the highest proportion that said "very respectful" and the lowest proportion that said "very disrespectful."  
 
+\newpage
 ### Task 3. Effect of sex and age on self-consciousness (Taylor Manifest Anxiety Scale)
 
-a. **Table 1. Self consciousness (Taylor Manifest Anxiety Scale) binomial logarithmic regression results.** Data source: openpsychometrics.org
+a. **Table 3.** Self consciousness (Taylor Manifest Anxiety Scale) binomial logarithmic regression results. Data source: openpsychometrics.org
 
 ```{r, include=FALSE}
 # For Task 3, explore effects of sex and age on probability that a person will respond True or False to the statement: “I am usually self-conscious.” Data in ‘tmas_df.csv’ are accessed and updated from openpsychometrics.org (a cool site for open-source survey data).
@@ -260,7 +259,6 @@ tmas_plot <- ggplot(graph_data, aes(x= Age, y= probability)) +
       text = element_text(family = "Times New Roman")) + #aesthetics
   labs(x = "Age",
        y = "Probability of answering “I am usually self-conscious.”") + #labels for the axes-- coord flip switched these earlier, so xlab is for the y axis now
-       theme(legend.position = "none") + #no legend 
   scale_y_continuous(expand = c(0,0)) + # move data to align w y axis
   scale_x_continuous(expand = c(0,0))+ # move data to align w x axis
   ggtitle("Binary Logistic Model of Self Consciousness by Age and Sex")
@@ -270,8 +268,9 @@ tmas_plot
 ```
 
 
-c. Between both sexes, the graph shows a decrease in the probability of self-reported self sonciousness with age. This is consistent with the results in (a) where the logodds of self consciousness has a negative coefficient with a significant p-value. Also there is a very small, almost imperceptible difference between males and females on the graph, which is consistent with the very small decrease in logodds predicted by the model between males and females with an p value > 0.05. 
+c. For both sexes, the graph shows a decrease in the probability of self-reported self consciousness with age. This is consistent with the results in (a) where the logodds of self consciousness has a negative coefficient with a significant p-value. Also there is a very small, almost imperceptible difference between males and females on the graph, which is consistent with the very small decrease in logodds predicted by the model between males and females with a p value > 0.05. 
 
+\newpage
 ### Task 4. Pyraclostrobin residue on crops
 a. In my exploratory visualization of the data, first I made a scatterplot to see the values of the pesticide chemical measurements for each crop. Looking at these, there appears to be a difference between strawberries and carrots, with strawberries having more measurements that are much higher. I would initally expect to use a t-test to compare the values for significant differences; in order to test this, I created histograms and q-q plots for each crop. Both of the histograms look non-normal, with a low peak and a long tail up to higher values. The q-q plots also are more curved than linear. Even if the data looked non-normal, with a large enough sample size, I would still consider doing a t-test, but with a summary table, I see that the sample size for carrots is less than 30. Thus, I choose to do a Mann Whitney-U Test because it is a non-parametric method to compare ranks between a continuous measured output.
 
@@ -352,10 +351,10 @@ pesticide_cliffs
 ```
 
 
-b. Pesticide use of Pyraclostrobin differed between the two crops, with a higher median pesticide measurement (`r pest_summary[1,"median"]` ppm) for carrots (n = `r pest_summary[1,"n"]`), versus a pesticide measurement median of (`r pest_summary[2,"median"]` ppm) for strawberries (n = `r pest_summary[2,"n"]`). A Mann-Whitney U test revealed that the difference was significant (W = `r pesticide_test$statistic`, p <0.001) with a large effect size (Cliff’s delta = `r pesticide_cliffs$estimate`).
+b. Pesticide use of Pyraclostrobin differed between the two crops, with a higher median pesticide measurement (`r pest_summary[1,"median"]` ppm) for carrots (n = `r pest_summary[1,"n"]`), versus a pesticide measurement median of `r pest_summary[2,"median"]` ppm for strawberries (n = `r pest_summary[2,"n"]`). A Mann-Whitney U test revealed that the difference was significant (W = `r pesticide_test$statistic`, p <0.001) with a large effect size (Cliff’s delta = `r pesticide_cliffs$estimate`).
 
 
-
+\newpage
 ### Task 5. Pesticides by County, California
 ```{r pesticide finalized plot, fig.align = "center"}
 # top ten CA counties ranked by pounds applied per mile plot
