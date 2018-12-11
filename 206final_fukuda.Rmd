@@ -131,9 +131,6 @@ e. Based on the diagnstic plots, my residuals appear to be non-heteroscedastic a
 ### Task 2. UCSB Campus Climate Survey-- Respectfulness by Respondent Race/Ethnicity
 
 a. I am looking at continuous data with more than two independent variables, so I am going to use a chi-squared test. This will answer the question: is there a significant association between perceived respect and racial groups on UCSB campus? 
-
-b. There is a significant difference between racial groups and perceived levels of respect on UCSB campus.
-
 ```{r, include=FALSE}
 
 # Looking at all continuous data, with more than two variables; going to use chi squared. This will answer the question: Is there a significant association between perceived respect on campus between racial groups? 
@@ -163,6 +160,9 @@ campusclimate_prop
 
 
 ```
+
+b. There is a significant difference between racial groups and perceived levels of respect on UCSB campus (($\chi^2$(`r ucsb_climate_x2$parameter`) = `r ucsb_climate_x2$statistic`, p <0.001, $\alpha$ = 0.05).
+
 
 c. **Table 2.** Proportions of survey respondents' perceptions of campus respect. Data source: [UCSB Campus Climate Survey](http://diversity.ucsb.edu/CampusClimate/)
 
